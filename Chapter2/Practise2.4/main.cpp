@@ -52,7 +52,7 @@ int main()
 	else
 		cout<<"Position "<<pos<<" in Pentagonal is "<<elem<<endl;
 	
-	//测试static可以加一个while循环 
+	//娴嬭瘯static鍙互鍔犱竴涓獁hile寰幆 
 	
 	return 0;
 }
