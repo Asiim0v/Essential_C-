@@ -12,7 +12,7 @@
 - 头文件用来声明该class所提供的各种操作行动。程序代码文件包含了这些操作行为的实现内容
 - 语句(statement)是C++程序的**最小**独立单元
 - 字符常量分为两类：第一类是可打印字符，例如英文字母(`'a'`、`'A'`)、数字、标点符号(`';'`、`'-'`)。另一类是不可打印字符，例如换行符(`'\n'`)或制表符(tab，`'\t'`)
-- **using **和 **namespace**都是C++中的关键字。**std**是标准库所驻的命名空间(namespace)的名称。标准库所提供的的任何事物(诸如string class以及cout、cin这两个iostream类对象)都被封装在命名空间std内
+- **using** 和 **namespace**都是C++中的关键字。**std**是标准库所驻的命名空间(namespace)的名称。标准库所提供的的任何事物(诸如string class以及cout、cin这两个iostream类对象)都被封装在命名空间std内
 - 命名空间(namespace)是一种将库名称封装起来的方法，可以避免和应用程序发生命名冲突的问题
 
 > [练习 1.1](https://github.com/Asiim0v/Essential_Cplusplus/blob/master/Chapter1/Practise1.1/main.cpp)
