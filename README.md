@@ -439,29 +439,194 @@
 
 ### 3.6 如何设计一个泛型算法
 
+#### Function Object
+
+- **所谓function object，是某种class的实例对象**，这类class对 function call 运算符做了重载操作，如此一来**可使function object被当成一般函数来使用**
+- 利用`function object`来替代"通过函数指针来调用函数"主要是**为了效率**
+- 标准库实现定义了一组`function object`，分为算术运算、关系运算和逻辑运算三大类。以下列表中的`type`在实际使用时会被替换为内置类型或`class`类型：
+
+```c++
+六个算术运算:
+plus<type>,minus<type>,negate<type>,multiplies<type>,divides<type>,modules<type>
+六个关系运算:			less<type>,less_equal<type>,greater<type>,greater_equal<type>,equal_to<type>,not_equal_to<type>
+三个逻辑运算：
+logical_and<type>,logical_or<type>,logical_not<type>
+```
+
+> 欲使用事先定义的`function object`，首先得包含头文件 #include <functional>
+
+举个例子，默认情形下，`sort()`会使用底部元素的类型所提供的的`less-than`运算符，将元素升序排列。如果我们传入`greater_than function object`，元素就会以降序排列，调用方法如下：
+
+```c++
+	sort(vec.begin(),vec.end(),greater<int>());
+```
+
+其中的`greater<int>()`会产生一个未命名的`class template object`，传给`sort()`
+
+#### Function Object Adapter
+
+举个例子，`function object `中的`less<type>`期望外界传入两个值，如果第一个值小于第二个值返回`true`。但假如我们希望将每个元素都和用户所指定的数值进行比较，那么理想情况下，我们需要做的是**将`less<type>`转化为一个一元(*unary*)运算符**。这可以通过"**将该`function object`的第二个参数绑定(*bind*)至用户指定的数值**"来完成。标准库提供的**`adapter`(适配器)**便应此而生。
+
+- `function object adapter`会对`function object`进行修改操作。所谓**`binder adapter`(绑定适配器)**会将`function object`的参数绑定至某特定值，使`binary function object`转化为`unary function object`
+- 标准库提供了两个`binder adapter`: `bind1st`会将指定值绑定至第一操作数；`bind2nd`会将指定值绑定至第二操作数
+
+```c++
+	//bind2nd(less<int>(),val);
+	//会把val绑定至less<int>的第二个参数上
+	//于是，less<int>会将每个元素与val进行比较，如果比val要小返回true
+```
+
+- **另一个`adapter`是所谓的`negator`**，它会对`function object`的真伪值取反。`not1`可对`unary function object`的真伪值取反；`not2`可对`binary function object`的真伪值取反
+
+```c++
+	//not1(bind2nd(less<int>,10))
+	//将10绑定至less<int>的第二个参数上，并对绑定后的function object的真伪值取反
+	//当元素大于等于10时返回true
+```
+
+### 3.7 使用Map
+
+- `map`被定义为一对(*pair*)数值，其中的`key`通常是个字符串，扮演索引的角色，另一个数值是`value`
+- 定义`map`需要包含头文件`#include <map>`
+
+```c++
+	#include <map>
+	#include <string>
+	map<string,int> words;
+	words["vermeer"] = 1;//输入key/value的最简单方式
+	string tword;
+	while(cin>>tword) words[tword]++;
+	//words[tword]会取出与tword相应的value；如果tword不在map内，它会自动被放入map内，并获得默认值0
+	map<string,int>::iterator it = words.begin();//map的遍历依然通过iterator
+	for(; it != words.end(); ++it)
+        cout<<"key: "<<it->first<<" value: "<<it->second<<endl;
+	//map对象有一个名为 first 的member,对应于key；另有一个名为 second 的member,对应于value
+```
+
+- 欲查询`map`内是否存在某个`key`，**不建议直接把`key`当成索引使用**：因为如果索引的`key`不在`map`内，这个`key`会被自动放入`map`中，而其`value`也会被设置为所属类型的默认值。
+- 查询`map`**建议利用`map`的`find()`函数**(不要和泛型算法`find()`搞混)
+
+```c++
+	int count = 0;
+	map<string,int>::iterator member;
+	member = words.find("vermeer");//map的find()函数内放入key值
+	if(member != words.end())
+        count = member->second;
+	//如果key在map中,find()会返回一个iterator,指向key/value形成的一个pair；反之会返回end()
+```
+
+- 另一种查询`map`的方法是**利用`map`的`count()`函数**。`count()`会返回特定项在`map`内的个数
+
+```c++
+	int count = 0;
+	if(words.count("vermeer")) //ok,它存在
+        count = words["vermeer"];
+```
+
+**注意：**任何一个`key`值在`map`内最多只会有一份。如果我们需要储存多份相同的`key`值，就必须使用`multimap`
+
+### 3.8 使用Set
+
+- `set`由一群`key`组合而成。如果我们想知道某值是否存在于某个集合内，就可以使用`set`
+- 对于任何`key`值，`set`只能储存一份。(如果要储存多份相同的`key`值，必须使用`multiset`)
+- 默认情况下，`set`元素皆依据**其所属类型默认的`less-than`运算符**进行排序，例如：
+
+```c++
+	int ia[10] = {1,3,5,8,5,3,1,5,8,1};
+	vector<int> vec(ia,ia+10);
+	set<int> iset(vec.begin(),vec.end());
+	//得到的iset的元素将是{1,3,5,8}
+
+	//如果要给set加入单一元素，可以使用单一参数的insert()
+	iset.insert(ival);
+	//如果要给set加入某个范围的元素，可以使用双参数的insert()
+	iset.insert(vec.begin(),vec.end());
+	//在set身上进行迭代，形式与map等相似
+	set<int>::iterator it = iset.begin();
+	for(; it != iset.end(); ++it)
+        cout<< *it << " ";
+	cout<<endl;
+```
+
+### 3.9 如何使用iterator insertor
+
+- 所有"会对元素进行复制行为"的泛型算法，例如`copy()`、`copy_backwards()`、`remove_copy()`、`replace_copy()`、`unique_copy()`等等，每个算法都接受一个`iterator`，标示出复制的起始位置。每复制一个元素，都会被赋值(*assigned*)，`iterator`则会递增到下一个位置。因此，**我们必须保证在每一次复制操作中，目的端容器足够大，保证`iterator`处于一个合法的位置**。
+- 为了解决每次总是传入某个固定大小的容器至上述算法中，标准库提供了三个所谓的**`insertion adapter`，**这些`adapter`让我们得以避免使用容器的`assignment`运算符：
+
+1. `back_inserter()`会**以容器的`push_back()`函数取代`assignment`运算符**。对于`vector`来说，这是十分适合的`inserter`。传入`back_inserter()`的参数就是容器本身：
+
+   ```c++
+   	vector<int> result_vec;
+   	copy(ivec.begin(),ivec.end(),back_inserter(result_vec));
+   ```
+
+2. `inserter()`会**以容器的`insert()`函数取代`assignment`运算符**。`inserter()`接受两个参数：一个是容器，另一个是**`iterator`，指向容器内的插入操作起点**。
+
+   ```c++
+   	vector<string> svec_res;
+   	copy(svec.begin(),svec.end(),inserter(svec_res,svec_res.end()));
+   ```
+
+3. `front_inserter()`会以容器的`push_front()`函数取代`assignment`运算符。这个`front_inserter`只适用于`list`和`deque`：
+
+   ```c++
+   	list<int> list_clone;
+   	copy(ilist.begin(),ilist_end(),front_inserter(list_clone));
+   ```
+
+> 欲使用上述三种`adapter`，需要包含头文件：`#include<iterator>`
+
+**注意：**这些`adapter`并不能用在`array`上。**`array`并不支持元素插入操作。**
+
+### 3.10 使用iostream iterator
+
+- 标准库定义有供输入及输出使用的`iostream iterator`类，称为`istream_iterator`和`ostream_iterator`，分别支持**单一类型的元素**读取和写入。
+- 使用这两个`iterator class`之前需要包含头文件`#include <iterator>`
+
+- 如何利用`istream_iterator`**从标准输入设备读取字符串？**和所有的`iterator`一样，我们需要一对`iterator`：first 和 last，用来标示元素范围。
 
 
+```c++
+	istream_iterator<string> is(cin);
+	//该定义为我们提供了一个first iterator,它将is定义为一个"绑定至标准输入设备"的istream_iterator
+	//last iterator表示"要读取的最后一个元素的下一位置"。对于标准输入设备而言，end-of-file表示last
+	//只要在定义istream_iterator的时候不为它指定任何istream对象，即表示了end-of-file，如下：
+	istream_iterator<string> eof;
+	//定义完一对iterator之后，我们将它们和储存字符串元素的vector，一起传给泛型算法copy()用作读取：
+	vector<string> text;
+	copy( is, eof, back_inserter(text));
+```
 
+- 对于输出，我需要一个`ostream_iterator`，标示字符串元素的输出位置：
 
+```c++
+	ostream_iterator<string> os(cout, " ");
+	//该定义将os定义为一个"绑定至标准输出设备"的ostream_iterator
+	//上述第二个参数可以是C-style字符串，也可以是字符串常量。它用来表示各个元素被输出时的分隔符，默认情况下，输出的各个元素间没有分隔符。
+	copy( text.begin(), text.end(), os);//copy会将储存在text中的每个元素一一写到由os所表示的ostream上
+```
 
+- 通常我们不需要从标准输入设备进行读取，也不需要写到标准输出设备中。而是**更多的希望从文件中读取或是写入到文件中**。这时候，只需要将定义的`istream_iterator`绑定至`ifstream object`上，将`ostream_iterator`绑定至`ofstream object`上即可：
 
+```c++
+	ifstream in_file("input_file.txt");
+	ofstream out_file("output_file.txt");
+	
+	istream_iterator<string> is(in_file);
+	istream_iterator<string> eof;
+	ostream_iterator<string> os(out_file, " ");
+	vector<string> text;
+	copy( is, eof, back_inserter(text)); //从file中读取至vector
+	copy( text.begin(), text.end(), os); //从vector中写入至file
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+> [练习 3.1](https://github.com/Asiim0v/Essential_Cplusplus/blob/master/Chapter3/Practice3.1/main.cpp)
+>
+> [练习 3.2](https://github.com/Asiim0v/Essential_Cplusplus/blob/master/Chapter3/Practice3.2/main.cpp)
+>
+> [练习 3.3](https://github.com/Asiim0v/Essential_Cplusplus/blob/master/Chapter3/Practice3.3/main.cpp)
+>
+> [练习 3.4](https://github.com/Asiim0v/Essential_Cplusplus/blob/master/Chapter3/Practice3.4/main.cpp)
 
 
 
