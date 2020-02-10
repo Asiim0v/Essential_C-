@@ -1,0 +1,6 @@
+#ignore output file
+*.exe
+
+#vscode configuration
+.vscode/
+.clang-format
