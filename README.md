@@ -118,8 +118,6 @@
 >
 > [练习 1.7](https://github.com/Asiim0v/Essential_Cplusplus/blob/master/Chapter1/Practise1.7/main.cpp)
 
-
-
 ## Chapter2. 面向过程的编程风格
 
 > 将函数独立出来的做法可带来 ***三个*** 主要好处：第一、以一连串函数调用操作，取代重复编写相同的程序代码，可使程序更容易读懂。第二、我们可以在不同的程序中使用这些函数。第三、我们可以更容易地将工作分配给协作开发团队。
@@ -627,6 +625,16 @@ logical_and<type>,logical_or<type>,logical_not<type>
 > [练习 3.3](https://github.com/Asiim0v/Essential_Cplusplus/blob/master/Chapter3/Practice3.3/main.cpp)
 >
 > [练习 3.4](https://github.com/Asiim0v/Essential_Cplusplus/blob/master/Chapter3/Practice3.4/main.cpp)
+
+## Chapter4. 基于对象的编程风格
+
+
+
+
+
+
+
+
 
 
 
