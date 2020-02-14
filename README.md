@@ -628,7 +628,8 @@ logical_and<type>,logical_or<type>,logical_not<type>
 
 ## Chapter4. 基于对象的编程风格
 
-
+> `class`名称被视为一个类型(*type*)名称，就像内置类型`int`、`double`一样
+>
 
 
 
