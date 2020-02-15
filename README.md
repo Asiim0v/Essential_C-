@@ -628,10 +628,7 @@ logical_and<type>,logical_or<type>,logical_not<type>
 
 ## Chapter4. 基于对象的编程风格
 
-> `class`名称被视为一个类型(*type*)名称，就像内置类型`int`、`double`一样
->
-
-
+> `class`名称被视为一个类型(*type*)名称，就像内置类型`int`、`double`一样。每个`class`都会提供一组**操作函数**，让我们作用于其`object`上。这些操作函数包括具名函数，如`size()`和`empty()`，以及重载运算符，如`equality`和`assignment`运算符
 
 
 
